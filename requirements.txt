@@ -1,0 +1,6 @@
+customtkinter
+pillow
+pandas
+openpyxl
+gdown
+flask
