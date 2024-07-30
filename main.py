@@ -1,3 +1,4 @@
+import os
 import customtkinter as ctk
 from PIL import Image
 import gdown
@@ -12,16 +13,25 @@ def extract_file_id(link):
         return None
 
 
-# Function to download the file from Google Drive and convert to JSON
-def download_and_convert_to_json():
+# Function to store the file ID globally
+def store_file_id():
+    global stored_file_id
     link = link_box.get()
     file_id = extract_file_id(link)
     if not file_id:
         display_code.delete("1.0", "end")
         display_code.insert("1.0", "Invalid Google Drive link. Please enter a valid link.")
+        return False
+    stored_file_id = file_id
+    return True
+
+
+# Function to download the file from Google Drive and convert to JSON
+def download_and_convert_to_json():
+    if not store_file_id():
         return
 
-    download_link = f"https://drive.google.com/uc?id={file_id}"
+    download_link = f"https://drive.google.com/uc?id={stored_file_id}"
 
     # Use gdown to download the file
     gdown.download(download_link, 'downloaded_file.csv', quiet=False)
@@ -29,6 +39,7 @@ def download_and_convert_to_json():
     # Convert CSV file to JSON
     df = pd.read_csv('downloaded_file.csv')
     json_data = df.to_json(orient='records')
+    os.remove("downloaded_file.csv")
 
     # Save JSON file
     with open('data.json', 'w') as json_file:
@@ -37,36 +48,36 @@ def download_and_convert_to_json():
     display_code.delete("1.0", "end")
     display_code.insert("1.0", "File downloaded and converted to data.json successfully.")
 
-    # Store the file ID for later use
-    global stored_file_id
-    stored_file_id = file_id
-
 
 # Function to update the code textbox
 def update_code_textbox():
-    link = link_box.get()
-    file_id = extract_file_id(link)
-    if not file_id:
-        display_code.delete("1.0", "end")
-        display_code.insert("1.0", "Invalid Google Drive link. Please enter a valid link.")
+    if not store_file_id():
         return
 
     script_code = f"""
 function doGet(e) {{
-  var fileId = '{file_id}';
+  var fileId = '{stored_file_id}';
   var file = DriveApp.getFileById(fileId);
-  var jsonData = file.getBlob().getDataAsString();
+  var csvData = file.getBlob().getDataAsString();
+  var csvArray = Utilities.parseCsv(csvData);
+  var jsonData = [];
+  var headers = csvArray[0];
+  for (var i = 1; i < csvArray.length; i++) {{
+    var row = csvArray[i];
+    var obj = {{}};
+    for (var j = 0; j < headers.length; j++) {{
+      obj[headers[j]] = row[j];
+    }}
+    jsonData.push(obj);
+  }}
 
-  return ContentService.createTextOutput(jsonData)
+  var jsonOutput = JSON.stringify(jsonData);
+  return ContentService.createTextOutput(jsonOutput)
       .setMimeType(ContentService.MimeType.JSON);
 }}
 """
     display_code.delete("1.0", "end")
     display_code.insert("1.0", script_code)
-
-    # Store the file ID for later use
-    global stored_file_id
-    stored_file_id = file_id
 
 
 # Initialize GUI
@@ -96,11 +107,11 @@ create_code = ctk.CTkButton(app, font=("DM Sans Regular", 18), height=35, width=
                             fg_color="#CAD2C5", hover_color="#84A98C", command=update_code_textbox)
 create_code.place(x=680, y=200)
 
-code_label = ctk.CTkLabel(app, text="Code :", font=("DM Sans Regular", 24), text_color="#CAD2C5", bg_color="#2f3e46")
+code_label = ctk.CTkLabel(app, text="Code :", font=("DM Sans Regular", 24), text_color="#CAD2C5", bg_color="#2F3E46")
 code_label.place(x=470, y=285)
 
 display_code = ctk.CTkTextbox(app, font=("Source Code Pro Regular", 16), width=460, height=250, bg_color="#2F3E46",
-                              fg_color="#2f3e46", border_color="#52796F", border_width=3)
+                              fg_color="#2F3E46", border_color="#52796F", border_width=3)
 display_code.place(x=470, y=320)
 
 step1_label = ctk.CTkLabel(app, font=("DM Sans Regular", 20),
@@ -124,12 +135,12 @@ success_label.place(x=60, y=400)
 
 image_path1 = "elements/element-1.png"
 png_image1 = ctk.CTkImage(dark_image=Image.open(image_path1), size=(100, 100))
-image_label1 = ctk.CTkLabel(app, image=png_image1, text="", bg_color="#2f3e46")
+image_label1 = ctk.CTkLabel(app, image=png_image1, text="", bg_color="#2F3E46")
 image_label1.place(x=0, y=0)
 
 image_path2 = "elements/element-2.png"
 png_image2 = ctk.CTkImage(dark_image=Image.open(image_path2), size=(250, 100))
-image_label2 = ctk.CTkLabel(app, image=png_image2, text="", bg_color="#2f3e46")
+image_label2 = ctk.CTkLabel(app, image=png_image2, text="", bg_color="#2F3E46")
 image_label2.place(x=750, y=0)
 
 app.mainloop()
