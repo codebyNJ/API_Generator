@@ -23,11 +23,14 @@ Simple software tools that help to convert your .csv files to an API
 2. Make the file public and copy the link.
 3. Paste the link in the box and choose your desired button.
    1. ***Download .json -*** creates a .json file of the .csv you have uploaded in Google Drive.
-   2. ***Create code to publish API -*** generates a code that can be pasted into Google Apps Scripts and deploy your API for free.
+   2. ***Create code to publish API -*** generates a code that can be pasted into Google Apps Scripts and deploys your API for free.
+
+### Images:
+![api_gen](https://github.com/user-attachments/assets/4985ab51-3576-4eec-8355-400fbb01a058)
 
 ### Technology: 
 ![Static Badge](https://img.shields.io/badge/Software%20Development-%20gree)   ![Static Badge](https://img.shields.io/badge/UI%2FUX-blue)
-![Static Badge](https://img.shields.io/badge/API%20Handleing-%20maroon)  ![Static Badge](https://img.shields.io/badge/URL%20Handleing-%20darkgreen)
+![Static Badge](https://img.shields.io/badge/API%20Handling-%20maroon)  ![Static Badge](https://img.shields.io/badge/URL%20Handling-%20darkgreen)
 
 
 
